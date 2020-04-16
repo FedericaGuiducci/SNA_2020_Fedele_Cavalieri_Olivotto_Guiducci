@@ -10,6 +10,7 @@ It is based on selenium
 First, download the Chrome Driver from [here](http://chromedriver.chromium.org/) and extract it into the driver folder.
 
 Set the number of users you want to scrape in the config.ini file.
+Set your linkedin email and password in the config.ini file.
 
 Finally, to scrape users run
 ```python3 main.py```
