@@ -9,3 +9,6 @@ __pycache__/
 
 # exception to the rule
 !/driver/.gitkeep 
+
+# users export
+users.csv
