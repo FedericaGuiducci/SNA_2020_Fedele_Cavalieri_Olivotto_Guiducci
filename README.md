@@ -14,6 +14,10 @@ Set the number of users you want to scrape in the config.ini file.
 Finally, to scrape users run
 ```python3 main.py```
 
+Se il run dovesse fallire, provate ad installare prima selenium e poi a dare il run.
+```pip install selenium```
+
+Se dovesse continuare a fallire scrivetemi.
 
 
 <!-- Create a python3 virtual environment following [this](https://docs.python.org/3/tutorial/venv.html).
