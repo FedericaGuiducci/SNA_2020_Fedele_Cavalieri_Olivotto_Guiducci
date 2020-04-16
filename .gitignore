@@ -5,4 +5,7 @@
 __pycache__/
 
 # exclude everything
-driver/*
+/driver/chromedriver
+
+# exception to the rule
+!/driver/.gitkeep 
