@@ -9,6 +9,7 @@ LOGIN_URL = "https://www.linkedin.com/uas/login"
 
 class BrowserNavigator:
     # ZOOMERS
+
     def zoom_out_browser(self):
         self.browser.execute_script("document.body.style.zoom = '65%'")
 
@@ -17,13 +18,22 @@ class BrowserNavigator:
         self.zoom_out_browser()
         time.sleep(1)
 
-    # HELPERS
-
-    def export_users_to_csv(self):
-        print("Exporting users list to csv")
+    # CSV HANDLERS
+    def create_users_csv(self):
+        print('Creating users csv')
         with open('users.csv', 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerows(self.users_list)
+            header = ['NAME', 'URL']
+            writer.writerow(header)
+
+    def append_user_record_to_csv(self, user):
+        print("Appending user to csv")
+        with open("users.csv", "a") as file:
+            # Append 'hello' at the end of file
+            writer = csv.writer(file)
+            writer.writerow(user)
+
+    # HELPERS
 
     def go_to_research_page_by_url(self):
         # Url copiato e incollato fa filtering su country Italy e basta
@@ -44,7 +54,7 @@ class BrowserNavigator:
     def wait_to_find_element_by_css(self, css_selector):
         sleep_time = self.SLEEP_TIME
         for attempts in range(self.MAX_LOADING_ATTEMPTS):
-            print("Attempt n°" + str(attempts + 1) + ". Current page: " + self.browser.current_url + " element searched: " + css_selector)
+            print("Attempt n°" + str(attempts + 1) + ". \nCurrent page: " + self.browser.current_url + " element searched: " + css_selector)
 
             time.sleep(sleep_time)
             element = self.try_find_element(css_selector)
@@ -108,6 +118,7 @@ class BrowserNavigator:
         self.wait_to_find_element_by_css(next_page_btn_cname)
     
     # MAIN
+
     def retreive_users_url(self):
         self.go_to_research_page_by_url()
 
@@ -124,8 +135,6 @@ class BrowserNavigator:
             
             if len(self.users_list) >= self.USERS_TO_SCRAPE:
                 break
-
-        self.export_users_to_csv()
 
     def scrape_result_page(self):
         self.wait_and_zoom_out()
@@ -152,9 +161,12 @@ class BrowserNavigator:
             name = search_info.find_element_by_class_name('actor-name')
             print(name.text)
 
-            print('\n')
+            user_data = [name.text, url]
             
-            self.users_list.append([name.text, url])
+            self.users_list.append(user_data)
+            self.append_user_record_to_csv(user_data)
+
+            print('\n')
 
     def log_in(self):
         print('Logging in...')
@@ -184,4 +196,3 @@ class BrowserNavigator:
         self.users_list = []
 
         browser.get(LOGIN_URL)
-
