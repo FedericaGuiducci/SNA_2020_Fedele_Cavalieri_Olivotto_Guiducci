@@ -7,8 +7,8 @@ Da scrivere
 ## Contenuto repository
 Scraping data off of LinkedIn is against their User Agreement. This is purely intended for educational purposes.
 
-* free-urls-scraper: scarica un numero dato di url a profili personali con filtro geografico su Italia
-
+* standard-urls-scraper: scarica un numero dato di url di profili personali con filtro geografico su Italia (STANDARD LINKEDIN ACCOUNT)
+* premium-urls-scrapere: scarica un numero dato di url di profili personali (PREMIUM LIKEDIN ACCOUNT)
 
 
 
