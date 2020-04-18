@@ -1,14 +1,2 @@
 # Mac OS hidden files
 .DS_Store
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-
-# exclude everything
-/driver/chromedriver
-
-# exception to the rule
-!/driver/.gitkeep 
-
-# users export
-users.csv
