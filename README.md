@@ -1,21 +1,18 @@
-# LinkedIn Free-account Users Url Scraper
-Linkedin scraper per account free.
-Permette di scaricare gli url di un tot di utenti settabile tramite il file config.ini
+# SNA_2020_Fedele_Cavalieri_Olivotto_Guiducci
+Social Network Analysis 2020 project group repository.
 
-## Disclaimer
+## Descrizione del progetto
+Da scrivere
+
+## Contenuto repository
+
+
 Scraping data off of LinkedIn is against their User Agreement. This is purely intended for educational purposes.
 
-## Dependencies 
-It is based on selenium 
+* free-account-scraper: scarica un numero dato di url a profili personali con filtro geografico su Italia
 
-## How to use
-First, download the Chrome Driver from [here](http://chromedriver.chromium.org/) and extract it into the driver folder.
 
-Set the number of users you want to scrape in the config.ini file.
-Set your linkedin email and password in the config.ini file.
 
-Finally, to scrape users run
-```python3 main.py```
 
 
 <!-- Create a python3 virtual environment following [this](https://docs.python.org/3/tutorial/venv.html).
