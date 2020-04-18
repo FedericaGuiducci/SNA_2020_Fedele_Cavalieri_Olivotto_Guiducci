@@ -12,12 +12,15 @@ def main():
 
     page = BrowserNavigator(browser)
     page.log_in()
+    page.go_to_sales_navigator_people_search()
 
-    page.create_users_csv()
-    page.retreive_users_url()
+    time.sleep(5)
 
-    print("Closing browser...")
-    browser.close()
+    # page.create_users_csv()
+    # page.retreive_users_url()
+
+    # print("Closing browser...")
+    # browser.close()
 
 
 if __name__ == '__main__':
