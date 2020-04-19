@@ -12,7 +12,6 @@ GEO_FILTER_QUERY_PARAM = 'geoIncluded'
 COMPANY_SIZE_FILTER_QUERY_PARAM = 'companySize'
 MULTI_FILTER_CONJ = '%2C'
 
-
 class BrowserNavigator:
     # URL MAKER
 
@@ -77,7 +76,7 @@ class BrowserNavigator:
         print('Creating users csv')
         with open('users.csv', 'w', newline='') as file:
             writer = csv.writer(file)
-            header = ['NAME', 'URL']
+            header = ['Name', 'Url']
             writer.writerow(header)
 
     def append_user_record_to_csv(self, user):
