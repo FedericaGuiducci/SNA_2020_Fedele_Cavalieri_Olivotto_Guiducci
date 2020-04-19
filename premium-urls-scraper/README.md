@@ -17,6 +17,24 @@ Set your linkedin email and password in the config.ini file.
 Finally, to scrape users run
 ```python3 main.py```
 
+## N. employess filters
+| Description   | KEY           |
+| ------------- | ------------- |
+| 1 (Freelance) | A             |
+| 1 - 10        | B             |
+| 11 - 50       | C             |
+| 51 - 200      | D             |
+| 201 - 500     | E             |
+| 501 - 1000    | F             |
+| 1001 - 5000   | G             |
+| 5001 - 10000  | H             |
+| above 10000   | I             |
+
+## Location geo filters
+| Description   | KEY           |
+| ------------- | ------------- |
+| Italia        | 103350119     |
+| Europa        | 100506914     |
 
 <!-- Create a python3 virtual environment following [this](https://docs.python.org/3/tutorial/venv.html).
 Within the virtual environment

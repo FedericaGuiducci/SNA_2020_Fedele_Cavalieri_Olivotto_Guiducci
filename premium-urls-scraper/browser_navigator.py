@@ -6,12 +6,65 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 LOGIN_URL = "https://www.linkedin.com/uas/login"
+PEOPLE_BASE_URL = 'https://www.linkedin.com/sales/search/people?'
+
+GEO_FILTER_QUERY_PARAM = 'geoIncluded'
+COMPANY_SIZE_FILTER_QUERY_PARAM = 'companySize'
+MULTI_FILTER_CONJ = '%2C'
+
 
 class BrowserNavigator:
+    # URL MAKER
+
+    def elab_url_from_config(self):
+        geo_filter_length = len(self.FILTER_LOCATION)
+        nemployees_filter_length = len(self.FILTER_NEMPLOYEES)
+
+        url_to_search = ''
+        first_filter_added = 0
+
+        # GEO FILTER
+        if geo_filter_length != 0 and self.FILTER_LOCATION[0] != '':
+            first_filter_added = 1
+            url_to_search = PEOPLE_BASE_URL + GEO_FILTER_QUERY_PARAM + '='
+
+            if geo_filter_length == 1:
+                url_to_search += self.FILTER_LOCATION[0]
+            else:
+                for i, geo_key in enumerate(self.FILTER_LOCATION):
+                    geo_key = geo_key.replace(" ", "")
+
+                    url_to_search += geo_key
+
+                    if i+1 != len(self.FILTER_LOCATION):
+                        url_to_search += MULTI_FILTER_CONJ
+
+        # N. EMPLOYEES FILTER
+        if nemployees_filter_length != 0 and self.FILTER_NEMPLOYEES[0] != '':
+            if first_filter_added == 0:
+                first_filter_added = 1
+                url_to_search = PEOPLE_BASE_URL + COMPANY_SIZE_FILTER_QUERY_PARAM + '='
+            else:
+                url_to_search += '&' + COMPANY_SIZE_FILTER_QUERY_PARAM + '='
+
+
+            if nemployees_filter_length == 1:
+                url_to_search += self.FILTER_NEMPLOYEES[0]
+            else:
+                for i, nemmp_key in enumerate(self.FILTER_NEMPLOYEES):
+                    nemmp_key = nemmp_key.replace(" ", "")
+
+                    url_to_search += nemmp_key
+
+                    if i+1 != len(self.FILTER_NEMPLOYEES):
+                        url_to_search += MULTI_FILTER_CONJ
+
+        return url_to_search
+
     # ZOOMERS
 
     def zoom_out_browser(self):
-        self.browser.execute_script("document.body.style.zoom = '65%'")
+        self.browser.execute_script("document.body.style.zoom = '75%'")
 
     def wait_and_zoom_out(self):
         time.sleep(1)
@@ -44,23 +97,24 @@ class BrowserNavigator:
 
     def go_to_sales_navigator_people_search(self):
         print('Going to sales navigator home page')
-        lead_search = 'https://www.linkedin.com/sales/search/people?viewAllFilters=true'
-        self.browser.get(lead_search)
-        self.wait_default_time()
-
-    def go_to_research_page_by_url(self):
-        # Url copiato e incollato fa filtering su country Italy e basta
-        people_url = 'https://www.linkedin.com/search/results/people/?facetGeoRegion=%5B%22it%3A0%22%5D&origin=FACETED_SEARCH'
-        self.browser.get(people_url)
+        url_to_search = self.elab_url_from_config()
+        self.browser.get(url_to_search)
         self.wait_and_zoom_out()
 
     def go_to_next_page_by_clicking(self):
-        next_page_btn_cname = 'artdeco-pagination__button--next'
-        next_page_btn = self.browser.find_element_by_class_name(next_page_btn_cname)
-        # next_page_btn.click()
-        self.browser.execute_script("arguments[0].click();", next_page_btn)
+        nav_pag_cn = 'search-results__pagination'
+        self.wait_to_find_element_by_class_name(nav_pag_cn)
+        nav_pag = self.browser.find_element_by_class_name(nav_pag_cn)
+
+        next_button_cn = 'search-results__pagination-next-button'
+        next_button = nav_pag.find_element_by_class_name(next_button_cn)
+
+        self.force_button_click(next_button)
     
     # HELPERS
+
+    def force_button_click(self, btn):
+        self.browser.execute_script("arguments[0].click();", btn)
 
     def find_element(self, class_name):
         element = self.browser.find_element_by_class_name(class_name)
@@ -92,10 +146,7 @@ class BrowserNavigator:
         self.scroll_page()
         after_scroll_page_height = self.browser.execute_script("return document.body.scrollHeight")
 
-        # change the id of the element in order to looking for ending elements
-        indicator_projects_still_loading = len(self.browser.find_elements_by_id('globalfooter-copyright'))
-
-        if after_scroll_page_height == pre_scroll_page_height and indicator_projects_still_loading != 0:
+        if after_scroll_page_height == pre_scroll_page_height:
             page_is_fully_loaded = True
         else:
             page_is_fully_loaded = False
@@ -111,6 +162,8 @@ class BrowserNavigator:
         self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
     def scroll_to_element_height(self, elem):
+        # SI POTREBBE MODIFICARE FACENDO OFFSETTOP - NAVBAR FISSA
+
         # Distanza da top pagina
         elem_scroll_height = elem.get_attribute("offsetTop")
         # Altezza elemento
@@ -128,25 +181,16 @@ class BrowserNavigator:
             time.sleep(sleep_time)
 
         print("Finished scrolling the page.")
-
-    def scroll_to_pagination(self):
-        next_page_btn_cname = 'artdeco-pagination__button--next'
-        next_page_btn = self.browser.find_element_by_class_name(next_page_btn_cname)
-        self.scroll_to_element_height(next_page_btn)
-        self.wait_to_find_element_by_class_name(next_page_btn_cname)
     
     # MAIN
 
     def retreive_users_url(self):
-        self.go_to_research_page_by_url()
-
         while True:
             if len(self.users_list) >= self.USERS_TO_SCRAPE:
                 break
                 
             self.scrape_result_page()
             self.scroll_page_to_end()
-            self.scroll_to_pagination()
             self.go_to_next_page_by_clicking()
 
             time.sleep(2)
@@ -156,30 +200,28 @@ class BrowserNavigator:
 
     def scrape_result_page(self):
         self.wait_and_zoom_out()
-        results_ul_cname = 'search-results__list'
-    
-        # aspetto trovi la lista di risultati
-        self.wait_to_find_element_by_class_name(results_ul_cname)
-        results_ul = self.browser.find_element_by_class_name(results_ul_cname)
+        result_items_cname = 'search-results__result-item'
+        
+        self.wait_to_find_element_by_class_name(result_items_cname)
+        results = self.browser.find_elements_by_class_name(result_items_cname)
 
-        options = results_ul.find_elements_by_tag_name("li")
-        search_info_cname = 'search-result__info'
-        for option in options:
-            # Scrollo all'altezza della singola persona
-            self.scroll_to_element_height(option)
+        for li in results:
+            self.scroll_to_element_height(li)
+            
+            search_info_cname = 'result-lockup__name'
+            
             # Aspetto che le informazioni vengano renderizzate
             self.wait_to_find_element_by_class_name(search_info_cname)
             
-            search_info = option.find_element_by_class_name(search_info_cname)
-
+            search_info = li.find_element_by_class_name(search_info_cname)
+            
             anchor_el = search_info.find_element_by_tag_name('a')
+            name = anchor_el.text
             url = anchor_el.get_property('href')
-            print(url)
 
-            name = search_info.find_element_by_class_name('actor-name')
-            print(name.text)
+            print('\n' + 'NAME: ' + name + 'URL: ' + url + '\n')
 
-            user_data = [name.text, url]
+            user_data = [name, url]
             
             self.users_list.append(user_data)
             self.append_user_record_to_csv(user_data)
@@ -210,6 +252,11 @@ class BrowserNavigator:
         self.SLEEP_TIME = int(config['CONFIG']['SLEEP_TIME'])
         self.USERS_TO_SCRAPE = int(config['CONFIG']['USERS_TO_SCRAPE'])
         self.MAX_LOADING_ATTEMPTS = int(config['CONFIG']['MAX_LOADING_ATTEMPTS'])
+
+        # Filters
+        self.FILTER_LOCATION = config['FILTERS']['LOCATION'].split(',')
+        self.FILTER_NEMPLOYEES = config['FILTERS']['NEMPLOYEES'].split(',')
+
         self.browser = browser
         self.users_list = []
 
