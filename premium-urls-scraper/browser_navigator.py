@@ -240,6 +240,7 @@ class BrowserNavigator:
 
     def scrape_result_page(self):
         self.wait_and_zoom_out()
+        
         result_items_cname = 'search-results__result-item'
         
         self.wait_to_find_element_by_class_name(result_items_cname)
@@ -261,7 +262,7 @@ class BrowserNavigator:
 
             print('\n' + 'NAME: ' + name + 'URL: ' + url + '\n')
 
-            user_data = [name, url]
+            user_data = [name.encode('utf8'), url.encode('utf8')]
             
             self.users_list.append(user_data)
             self.append_user_record_to_csv(user_data)
