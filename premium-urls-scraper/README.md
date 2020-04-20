@@ -11,24 +11,24 @@ It is based on selenium
 ## How to use
 First, download the Chrome Driver from [here](http://chromedriver.chromium.org/) and extract it into the driver folder.
 
-Set the number of users you want to scrape in the config.ini file.
+Set the number of users you want to scrape (2500 max) in the config.ini file.
 Set your linkedin email and password in the config.ini file.
 
 Finally, to scrape users run
 ```python3 main.py```
 
 ## N. employess filters
-| Description   | KEY           |
-| ------------- | ------------- |
-| 1 (Freelance) | A             |
-| 1 - 10        | B             |
-| 11 - 50       | C             |
-| 51 - 200      | D             |
-| 201 - 500     | E             |
-| 501 - 1000    | F             |
-| 1001 - 5000   | G             |
-| 5001 - 10000  | H             |
-| above 10000   | I             |
+| Description       | KEY           |
+| ----------------- | ------------- |
+| 1 (Freelance)     | A             |
+| 1 - 10            | B             |
+| 11 - 50           | C             |
+| 51 - 200          | D             |
+| 201 - 500         | E             |
+| 501 - 1000        | F             |
+| 1001 - 5000       | G             |
+| 5001 - 10000      | H             |
+| more than 10000   | I             |
 
 ## Location geo filters
 | Description   | KEY           |
@@ -36,15 +36,4 @@ Finally, to scrape users run
 | Italia        | 103350119     |
 | Europa        | 100506914     |
 
-<!-- Create a python3 virtual environment following [this](https://docs.python.org/3/tutorial/venv.html).
-Within the virtual environment
-```pip install -r requirements.txt```
 
-Edit the `conf.json` config file accordingly specifying the chrome bin path, e.g. by typying 
-```which google-chrome``` in a UNIX shell command line, the chrome driver path, the desired queries
-and so forth. 
-
-Finally, to scrape users run 
-```python scrape_users.py --conf conf.json```
-or jobs
-```python scrape_jobs.py --conf conf.json``` -->

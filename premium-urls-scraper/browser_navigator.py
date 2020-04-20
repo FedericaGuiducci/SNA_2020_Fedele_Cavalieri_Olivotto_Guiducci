@@ -88,12 +88,6 @@ class BrowserNavigator:
 
     # NAVIGATORS
 
-    def go_to_sales_navigator_home(self):
-        print('Going to sales navigator home page')
-        sales_navigator_url = 'https://www.linkedin.com/sales/homepage'
-        self.browser.get(sales_navigator_url)
-        self.wait_default_time()
-
     def go_to_sales_navigator_people_search(self):
         print('Going to sales navigator home page')
         url_to_search = self.elab_url_from_config()
@@ -109,8 +103,48 @@ class BrowserNavigator:
         next_button = nav_pag.find_element_by_class_name(next_button_cn)
 
         self.force_button_click(next_button)
-    
+
+    def go_to_next_page_by_url(self):
+        current_url = self.browser.current_url
+
+        delimiter = '&page=' 
+        index = current_url.find(delimiter)
+
+        if index == -1:
+            self.go_to_next_page_by_clicking()
+        else:
+            first_part = current_url[:index]
+            second_part = current_url[index:]
+
+            page_number = ''
+
+            # Escludo la prima &page= dal for
+            sec_wo_e = second_part[6:]
+            remaining_url = ''
+
+            for i in range( len(sec_wo_e) ):
+                print(sec_wo_e[i])
+                if sec_wo_e[i] != '&':
+                    page_number += sec_wo_e[i]
+                else:
+                    remaining_url += sec_wo_e[i:]
+                    break
+                    
+            new_number = str(int(page_number) + 1)
+            new_url = first_part + delimiter + new_number + remaining_url
+
+            print('Moving to page ' + new_url)
+            self.browser.get(new_url)
+
     # HELPERS
+
+    def save_screenshot(self, fn):
+        self.browser.save_screenshot(fn)
+
+    def refresh_page(self):
+        print('Refreshing page!')
+        self.browser.refresh()
+        self.wait_and_zoom_out()
 
     def force_button_click(self, btn):
         self.browser.execute_script("arguments[0].click();", btn)
@@ -130,12 +164,16 @@ class BrowserNavigator:
         for attempts in range(self.MAX_LOADING_ATTEMPTS):
             print("Attempt n°" + str(attempts + 1) + ". \nCurrent page: " + self.browser.current_url + " element searched: " + class_name)
 
+            if attempts >= int(self.MAX_LOADING_ATTEMPTS) / 2:
+                self.refresh_page()
+
             time.sleep(sleep_time)
             element = self.try_find_element(class_name)
             if element is not None:
                 time.sleep(sleep_time)
                 return element
         
+        self.save_screenshot("screenshot_error.png")
         raise NoSuchElementException("after ", sleep_time, " attempts the element is still not \ found.")
 
     def verify_all_page_is_loaded(self):
@@ -191,6 +229,7 @@ class BrowserNavigator:
             self.scrape_result_page()
             self.scroll_page_to_end()
             self.go_to_next_page_by_clicking()
+            # self.go_to_next_page_by_url()
 
             time.sleep(2)
             

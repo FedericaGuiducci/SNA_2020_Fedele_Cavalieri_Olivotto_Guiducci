@@ -15,11 +15,12 @@ def main():
     time.sleep(2)
 
     page.go_to_sales_navigator_people_search()
-    time.sleep(5)
+    time.sleep(2)
 
     page.create_users_csv()
     page.retreive_users_url()
 
+    page.save_screenshot("screenshot_closing.png")
     print("Closing browser...")
     browser.close()
 

@@ -10,5 +10,9 @@ __pycache__/
 # exception to the rule
 !/driver/.gitkeep 
 
-# users export
+# Csv export
 users.csv
+
+# Screenshots
+screenshot_error.png
+screenshot_closing.png
