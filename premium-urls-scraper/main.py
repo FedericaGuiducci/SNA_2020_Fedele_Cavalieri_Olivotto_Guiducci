@@ -1,6 +1,6 @@
 import time
 from selenium import webdriver
-from BrowserNavigator import BrowserNavigator
+from classes.BrowserNavigator import BrowserNavigator
 
 def main():
     # Browser Driver

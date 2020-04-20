@@ -1,6 +1,6 @@
 import time, configparser, csv
 from selenium.common.exceptions import NoSuchElementException
-from Helpers import Helpers
+from classes.Helpers import Helpers
 
 config = configparser.ConfigParser()
 config.read('config.ini')
