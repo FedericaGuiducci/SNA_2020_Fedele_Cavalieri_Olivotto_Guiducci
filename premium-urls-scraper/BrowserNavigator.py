@@ -1,96 +1,31 @@
 import time, configparser, csv
 from selenium.common.exceptions import NoSuchElementException
+from Helpers import Helpers
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 LOGIN_URL = "https://www.linkedin.com/uas/login"
-PEOPLE_BASE_URL = 'https://www.linkedin.com/sales/search/people?'
-
-GEO_FILTER_QUERY_PARAM = 'geoIncluded'
-COMPANY_SIZE_FILTER_QUERY_PARAM = 'companySize'
-MULTI_FILTER_CONJ = '%2C'
 
 class BrowserNavigator:
-    # URL MAKER
-
-    def elab_url_from_config(self):
-        geo_filter_length = len(self.FILTER_LOCATION)
-        nemployees_filter_length = len(self.FILTER_NEMPLOYEES)
-
-        url_to_search = ''
-        first_filter_added = 0
-
-        # GEO FILTER
-        if geo_filter_length != 0 and self.FILTER_LOCATION[0] != '':
-            first_filter_added = 1
-            url_to_search = PEOPLE_BASE_URL + GEO_FILTER_QUERY_PARAM + '='
-
-            if geo_filter_length == 1:
-                url_to_search += self.FILTER_LOCATION[0]
-            else:
-                for i, geo_key in enumerate(self.FILTER_LOCATION):
-                    geo_key = geo_key.replace(" ", "")
-
-                    url_to_search += geo_key
-
-                    if i+1 != len(self.FILTER_LOCATION):
-                        url_to_search += MULTI_FILTER_CONJ
-
-        # N. EMPLOYEES FILTER
-        if nemployees_filter_length != 0 and self.FILTER_NEMPLOYEES[0] != '':
-            if first_filter_added == 0:
-                first_filter_added = 1
-                url_to_search = PEOPLE_BASE_URL + COMPANY_SIZE_FILTER_QUERY_PARAM + '='
-            else:
-                url_to_search += '&' + COMPANY_SIZE_FILTER_QUERY_PARAM + '='
-
-
-            if nemployees_filter_length == 1:
-                url_to_search += self.FILTER_NEMPLOYEES[0]
-            else:
-                for i, nemmp_key in enumerate(self.FILTER_NEMPLOYEES):
-                    nemmp_key = nemmp_key.replace(" ", "")
-
-                    url_to_search += nemmp_key
-
-                    if i+1 != len(self.FILTER_NEMPLOYEES):
-                        url_to_search += MULTI_FILTER_CONJ
-
-        return url_to_search
-
+    
     # ZOOMERS
 
     def zoom_out_browser(self):
-        self.browser.execute_script("document.body.style.zoom = '75%'")
+        self.browser.execute_script("document.body.style.zoom = '70%'")
 
     def wait_and_zoom_out(self):
         self.wait_default_time()
         self.zoom_out_browser()
         self.wait_default_time()
 
-    # CSV HANDLERS
-
-    def create_users_csv(self):
-        print('Creating users csv')
-        with open('users.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            header = ['Name', 'Url']
-            writer.writerow(header)
-
-    def append_user_record_to_csv(self, user):
-        print("Appending user to csv")
-        with open("users.csv", "a") as file:
-            # Append 'hello' at the end of file
-            writer = csv.writer(file)
-            writer.writerow(user)
-
     # NAVIGATORS
 
     def go_to_sales_navigator_people_search(self):
         print('Going to sales navigator home page')
-        url_to_search = self.elab_url_from_config()
+        url_to_search = self.Helpers.elab_url_from_config()
         self.browser.get(url_to_search)
+        self.Helpers.create_users_csv()
         self.wait_and_zoom_out()
 
     def go_to_next_page_by_clicking(self):
@@ -201,8 +136,6 @@ class BrowserNavigator:
         self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
     def scroll_to_element_height(self, elem):
-        # SI POTREBBE MODIFICARE FACENDO OFFSETTOP - NAVBAR FISSA
-
         # Distanza da top pagina
         elem_scroll_height = elem.get_attribute("offsetTop")
         # Altezza elemento
@@ -223,7 +156,7 @@ class BrowserNavigator:
     
     # MAIN
 
-    def retreive_users_url(self):
+    def fetch_users_url(self):
         while True:
             if len(self.users_list) >= self.USERS_TO_SCRAPE:
                 break
@@ -260,12 +193,15 @@ class BrowserNavigator:
             name = anchor_el.text
             url = anchor_el.get_property('href')
 
-            print('\n' + 'NAME: ' + name + 'URL: ' + url + '\n')
+            # 2:-1 per rimuovere la b iniziale e gli apici iniziale e finale
+            encoded_name = str(name.encode('utf8'))[2:-1]
+            encoded_url = str(url.encode('utf8'))[2:-1]
 
-            user_data = [name.encode('utf8'), url.encode('utf8')]
+            user_data = [encoded_name, encoded_url]
+            print ('USER DATA: ' + str(user_data))
             
             self.users_list.append(user_data)
-            self.append_user_record_to_csv(user_data)
+            self.Helpers.append_user_record_to_csv(user_data)
 
             print('\n')
 
@@ -289,16 +225,16 @@ class BrowserNavigator:
         print("Logged")
 
     def __init__(self, browser):
+        # Class attribute
+        self.browser = browser
+        self.users_list = []
+
         # App config
         self.SLEEP_TIME = int(config['CONFIG']['SLEEP_TIME'])
         self.USERS_TO_SCRAPE = int(config['CONFIG']['USERS_TO_SCRAPE'])
         self.MAX_LOADING_ATTEMPTS = int(config['CONFIG']['MAX_LOADING_ATTEMPTS'])
 
-        # Filters
-        self.FILTER_LOCATION = config['FILTERS']['LOCATION'].split(',')
-        self.FILTER_NEMPLOYEES = config['FILTERS']['NEMPLOYEES'].split(',')
-
-        self.browser = browser
-        self.users_list = []
+        # Classes
+        self.Helpers = Helpers()
 
         browser.get(LOGIN_URL)

@@ -11,7 +11,7 @@ __pycache__/
 !/driver/.gitkeep 
 
 # Csv export
-users.csv
+*.csv
 
 # Screenshots
 screenshot_error.png
