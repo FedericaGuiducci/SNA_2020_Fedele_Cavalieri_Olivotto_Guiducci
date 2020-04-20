@@ -1,5 +1,4 @@
 import time, configparser, csv
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 config = configparser.ConfigParser()
@@ -66,9 +65,9 @@ class BrowserNavigator:
         self.browser.execute_script("document.body.style.zoom = '75%'")
 
     def wait_and_zoom_out(self):
-        time.sleep(1)
+        self.wait_default_time()
         self.zoom_out_browser()
-        time.sleep(1)
+        self.wait_default_time()
 
     # CSV HANDLERS
 
@@ -137,6 +136,9 @@ class BrowserNavigator:
             self.browser.get(new_url)
 
     # HELPERS
+
+    def wait_two_seconds(self):
+        time.sleep(2)
 
     def save_screenshot(self, fn):
         self.browser.save_screenshot(fn)
@@ -231,7 +233,7 @@ class BrowserNavigator:
             self.go_to_next_page_by_clicking()
             # self.go_to_next_page_by_url()
 
-            time.sleep(2)
+            self.wait_two_seconds()
             
             if len(self.users_list) >= self.USERS_TO_SCRAPE:
                 break

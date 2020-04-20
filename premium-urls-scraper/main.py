@@ -1,21 +1,17 @@
-import time, configparser, csv
+import time
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
 from browser_navigator import BrowserNavigator
 
 def main():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
     # Browser Driver
     browser = webdriver.Chrome("./driver/chromedriver")
 
     page = BrowserNavigator(browser)
     page.log_in()
-    time.sleep(2)
+    page.wait_two_seconds()
 
     page.go_to_sales_navigator_people_search()
-    time.sleep(2)
+    page.wait_two_seconds()
 
     page.create_users_csv()
     page.retreive_users_url()
