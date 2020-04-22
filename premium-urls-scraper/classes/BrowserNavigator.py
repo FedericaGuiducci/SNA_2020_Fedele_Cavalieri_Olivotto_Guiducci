@@ -21,11 +21,12 @@ class BrowserNavigator:
 
     # NAVIGATORS
 
-    def go_to_sales_navigator_people_search(self):
-        print('Going to sales navigator home page')
-        url_to_search = self.Helpers.elab_url_from_config()
-        self.browser.get(url_to_search)
-        self.Helpers.create_users_csv()
+    def load_multi_configurations(self):
+        self.URL_LIST_TO_SEARCH = self.Helpers.elab_multi_configurations()
+
+    def go_to_research_url(self, url):
+        print('Going to url ' + str(url))
+        self.browser.get(url)
         self.wait_and_zoom_out()
 
     def go_to_next_page_by_clicking(self):
@@ -38,39 +39,18 @@ class BrowserNavigator:
 
         self.force_button_click(next_button)
 
-    def go_to_next_page_by_url(self):
-        current_url = self.browser.current_url
-
-        delimiter = '&page=' 
-        index = current_url.find(delimiter)
-
-        if index == -1:
-            self.go_to_next_page_by_clicking()
-        else:
-            first_part = current_url[:index]
-            second_part = current_url[index:]
-
-            page_number = ''
-
-            # Escludo la prima &page= dal for
-            sec_wo_e = second_part[6:]
-            remaining_url = ''
-
-            for i in range( len(sec_wo_e) ):
-                print(sec_wo_e[i])
-                if sec_wo_e[i] != '&':
-                    page_number += sec_wo_e[i]
-                else:
-                    remaining_url += sec_wo_e[i:]
-                    break
-                    
-            new_number = str(int(page_number) + 1)
-            new_url = first_part + delimiter + new_number + remaining_url
-
-            print('Moving to page ' + new_url)
-            self.browser.get(new_url)
-
     # HELPERS
+
+    def is_next_btn_is_enabled(self):
+        nav_pag_cn = 'search-results__pagination'
+        self.wait_to_find_element_by_class_name(nav_pag_cn)
+        nav_pag = self.browser.find_element_by_class_name(nav_pag_cn)
+
+        next_button_cn = 'search-results__pagination-next-button'
+        next_button = nav_pag.find_element_by_class_name(next_button_cn)
+        is_enabeld = next_button.is_enabled()
+
+        return is_enabeld
 
     def wait_two_seconds(self):
         time.sleep(2)
@@ -156,22 +136,35 @@ class BrowserNavigator:
     
     # MAIN
 
-    def fetch_users_url(self):
+    def fetch_single_page_people(self):
         while True:
-            if len(self.users_list) >= self.USERS_TO_SCRAPE:
+            if len(self.users_scraped) >= self.USERS_TO_SCRAPE:
                 break
                 
-            self.scrape_result_page()
+            self.scrape_page_result()
             self.scroll_page_to_end()
-            self.go_to_next_page_by_clicking()
-            # self.go_to_next_page_by_url()
 
-            self.wait_two_seconds()
+            next_btn_enabled = self.is_next_btn_is_enabled()
+            if (next_btn_enabled):
+                self.go_to_next_page_by_clicking()
+                self.wait_two_seconds()
+            else:
+                break
             
-            if len(self.users_list) >= self.USERS_TO_SCRAPE:
+            if len(self.users_scraped) >= self.USERS_TO_SCRAPE:
                 break
 
-    def scrape_result_page(self):
+    def fetch_users_url(self):
+        for obj in self.URL_LIST_TO_SEARCH:
+            self.CURRENT_FILTER_LOCATION = obj.location
+            self.CURRENT_FILTER_EMPLOYEES = obj.employees
+            self.CURRENT_FILTER_INDUSTRIES = obj.industries
+
+            self.go_to_research_url(obj.search_url)
+            self.fetch_single_page_people()
+        
+
+    def scrape_page_result(self):
         self.wait_and_zoom_out()
         
         result_items_cname = 'search-results__result-item'
@@ -195,12 +188,11 @@ class BrowserNavigator:
 
             # 2:-1 per rimuovere la b iniziale e gli apici iniziale e finale
             encoded_name = str(name.encode('utf8'))[2:-1]
-            encoded_url = str(url.encode('utf8'))[2:-1]
-
-            user_data = [encoded_name, encoded_url]
+        
+            user_data = [encoded_name, url, self.CURRENT_FILTER_LOCATION, self.CURRENT_FILTER_EMPLOYEES, self.CURRENT_FILTER_LOCATION]
             print ('USER DATA: ' + str(user_data))
             
-            self.users_list.append(user_data)
+            self.users_scraped.append(user_data)
             self.Helpers.append_user_record_to_csv(user_data)
 
             print('\n')
@@ -227,7 +219,7 @@ class BrowserNavigator:
     def __init__(self, browser):
         # Class attribute
         self.browser = browser
-        self.users_list = []
+        self.users_scraped = []
 
         # App config
         self.SLEEP_TIME = int(config['CONFIG']['SLEEP_TIME'])
@@ -236,5 +228,8 @@ class BrowserNavigator:
 
         # Classes
         self.Helpers = Helpers()
+
+        # Initializing csv
+        self.Helpers.create_users_csv()
 
         browser.get(LOGIN_URL)

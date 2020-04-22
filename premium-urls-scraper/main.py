@@ -11,7 +11,7 @@ def main():
     page.log_in()
     page.wait_two_seconds()
 
-    page.go_to_sales_navigator_people_search()
+    page.load_multi_configurations()
     page.wait_two_seconds()
 
     page.fetch_users_url()
