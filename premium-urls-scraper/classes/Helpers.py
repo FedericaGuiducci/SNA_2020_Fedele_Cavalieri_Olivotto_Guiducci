@@ -119,4 +119,7 @@ class Helpers:
         print('Initializing Helpers class')
 
         # CSV
-        self.FILE_NAME = CSV_BASE_PATH + str(datetime.now()) + '.csv'
+
+        date = datetime.now()
+        
+        self.FILE_NAME = './' + CSV_BASE_PATH + date.strftime('%m_%d_%Y_%H_%M_%S') + '.csv'
